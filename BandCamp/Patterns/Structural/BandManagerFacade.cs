@@ -85,5 +85,50 @@ namespace BandCamp.Patterns.Structural
             _tourService.GetToursByBandId(bandId);
 
         public void DeleteTour(int id) => _tourService.DeleteTour(id);
+
+        public System.Drawing.Image GetMemberPhoto(string photoPath)
+        {
+            IMemberImage proxy = new MemberImageProxy(photoPath);
+            return proxy.GetPhoto();
+        }
+
+        // --- Composite ---
+        public BandCatalog BuildCatalog(Band band)
+        {
+            var catalog = new BandCatalog(band.Name);
+            var album = new MusicAlbum($"Альбом группы {band.Name}");
+            album.Add(new MusicTrack("Трек 1", 210));
+            album.Add(new MusicTrack("Трек 2", 185));
+            catalog.Add(album);
+            return catalog;
+        }
+
+        // --- Bridge: preview ---
+        public string ExportMembersPreview(int bandId)
+        {
+            var members = GetMembersOfBand(bandId);
+            var renderer = new TextPreviewRenderer();
+            var exporter = new MembersExporter(members, renderer);
+            exporter.Export();
+            return renderer.Result;
+        }
+
+        // --- Bridge: CSV ---
+        public void ExportMembersCsv(int bandId, string filePath)
+        {
+            var members = GetMembersOfBand(bandId);
+            var renderer = new CsvExportRenderer(filePath);
+            var exporter = new MembersExporter(members, renderer);
+            exporter.Export();
+        }
+
+        public void ExportToursCsv(int bandId, string filePath)
+        {
+            var tours = GetToursOfBand(bandId);
+            var renderer = new CsvExportRenderer(filePath);
+            var exporter = new ToursExporter(tours, renderer);
+            exporter.Export();
+        }
+
     }
 }

@@ -12,12 +12,30 @@ namespace BandCamp.UI
     {
         private readonly BandManagerFacade _facade;
         private Band _selectedBand;
+        private string _selectedPhotoPath;
 
         public BandForm(BandManagerFacade facade)
         {
             InitializeComponent();
             _facade = facade;
             LoadBands();
+        }
+
+        private void btnSelectPhoto_Click(object sender, EventArgs e)
+        {
+            using (var dlg = new OpenFileDialog())
+            {
+                dlg.Title = "Выберите фото участника";
+                dlg.Filter = "Изображения|*.jpg;*.jpeg;*.png;*.bmp";
+
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    _selectedPhotoPath = dlg.FileName;
+
+                    IMemberImage proxy = new MemberImageProxy(_selectedPhotoPath);
+                    picMemberPhoto.Image = proxy.GetPhoto();
+                }
+            }
         }
 
         private void LoadBands()
@@ -114,6 +132,40 @@ namespace BandCamp.UI
             dtpFormation.Value = DateTime.Today;
             txtDescription.Text = "";
             listMembers.Items.Clear();
+            picMemberPhoto.Image = null;
+            _selectedPhotoPath = null;
         }
+
+        private void BandForm_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnExport_Click(object sender, EventArgs e)
+        {
+            if (_selectedBand == null)
+            {
+                MessageBox.Show("Сначала выберите группу");
+                return;
+            }
+
+            // Показываем Bridge в действии — сначала preview
+            string preview = _facade.ExportMembersPreview(_selectedBand.Id);
+            MessageBox.Show(preview, "Предпросмотр экспорта");
+
+            // Потом предлагаем сохранить CSV
+            using (var dlg = new SaveFileDialog())
+            {
+                dlg.Filter = "CSV файлы|*.csv";
+                dlg.FileName = $"{_selectedBand.Name}_members.csv";
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    _facade.ExportMembersCsv(_selectedBand.Id, dlg.FileName);
+                    MessageBox.Show("Файл сохранён!", "Готово",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+        }
+
     }
 }
