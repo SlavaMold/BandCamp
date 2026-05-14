@@ -57,7 +57,7 @@ namespace BandCamp.Infrastructure.Repositories
                 cmd.Parameters.AddWithValue("@FormationDate", band.FormationDate.ToString("yyyy-MM-dd"));
                 cmd.Parameters.AddWithValue("@Description", band.Description ?? "");
                 cmd.ExecuteNonQuery();
-                band.Id = (int)new SQLiteCommand("SELECT last_insert_rowid()", _conn).ExecuteScalar();
+                band.Id = (int)(long)new SQLiteCommand("SELECT last_insert_rowid()", _conn).ExecuteScalar();
             }
         }
 
@@ -117,7 +117,8 @@ namespace BandCamp.Infrastructure.Repositories
         private Member MapMember(SQLiteDataReader r) => new Member
         {
             Id = Convert.ToInt32(r["Id"]),
-            FullName = r["FullName"].ToString(),
+            FirstName = r["FirstName"].ToString(),
+            LastName = r["LastName"].ToString(),
             Role = r["Role"].ToString(),
             JoinDate = DateTime.Parse(r["JoinDate"].ToString()),
             PhotoPath = r["PhotoPath"].ToString(),

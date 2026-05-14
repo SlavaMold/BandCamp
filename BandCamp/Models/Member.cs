@@ -9,13 +9,16 @@ namespace BandCamp.Models
     public class Member
     {
         public int Id { get; set; }
-        public string FullName { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
         public string Role { get; set; }
+        public int ExperienceYears { get; set; }
         public DateTime JoinDate { get; set; }
         public string PhotoPath { get; set; }
         public bool IsActive { get; set; } = true;
         public List<Band> Bands { get; set; } = new List<Band>();
 
-        public override string ToString() => $"{FullName} — {Role}";
+        public string FullName => $"{FirstName} {LastName}".Trim();
+        public override string ToString() => FullName;
     }
 }

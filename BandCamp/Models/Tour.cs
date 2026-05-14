@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BandCamp.Models
 {
@@ -10,6 +7,7 @@ namespace BandCamp.Models
     {
         public int Id { get; set; }
         public int BandId { get; set; }
+        public string BandName { get; set; }
         public string Name { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
@@ -17,6 +15,7 @@ namespace BandCamp.Models
         public string Country { get; set; }
         public List<Concert> Concerts { get; set; } = new List<Concert>();
 
-        public override string ToString() => $"{Name} ({StartDate:dd.MM.yyyy} — {EndDate:dd.MM.yyyy})";
+        public override string ToString() =>
+            $"{Name} — {BandName} ({StartDate:dd.MM.yyyy} / {EndDate:dd.MM.yyyy})";
     }
 }

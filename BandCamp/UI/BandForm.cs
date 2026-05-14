@@ -1,4 +1,5 @@
 ﻿using BandCamp.Models;
+using BandCamp.Patterns.Behavioral;
 using BandCamp.Patterns.Structural;
 using System;
 using System.Drawing;
@@ -99,15 +100,17 @@ namespace BandCamp.UI
 
             var result = MessageBox.Show(
                 $"Удалить группу «{_selectedBand.Name}»?",
-                "Подтверждение",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question);
+                "Подтверждение", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
             if (result == DialogResult.Yes)
             {
-                _facade.DeleteBand(_selectedBand.Id);
+                var cmd = new DeleteBandCommand(_facade, _selectedBand);
+                CommandManager.Instance.Execute(cmd);
                 _selectedBand = null;
                 LoadBands();
+
+                // Обновляем кнопки Undo/Redo в MainForm
+                (ParentForm as MainForm)?.UpdateUndoRedoButtons();
             }
         }
 
@@ -166,6 +169,8 @@ namespace BandCamp.UI
                 }
             }
         }
+
+        public void RefreshList() => LoadBands();
 
     }
 }

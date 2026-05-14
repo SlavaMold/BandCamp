@@ -17,7 +17,7 @@ namespace BandCamp.Infrastructure.Repositories
         public List<Tour> GetAll()
         {
             var tours = new List<Tour>();
-            string sql = "SELECT * FROM Tours";
+            string sql = "SELECT * FROM Tours ORDER BY StartDate DESC";
             using (var cmd = new SQLiteCommand(sql, _conn))
             using (var reader = cmd.ExecuteReader())
             {
@@ -44,7 +44,7 @@ namespace BandCamp.Infrastructure.Repositories
         public List<Tour> GetToursByBandId(int bandId)
         {
             var tours = new List<Tour>();
-            string sql = "SELECT * FROM Tours WHERE BandId = @BandId";
+            string sql = "SELECT * FROM Tours WHERE BandId = @BandId ORDER BY StartDate DESC";
             using (var cmd = new SQLiteCommand(sql, _conn))
             {
                 cmd.Parameters.AddWithValue("@BandId", bandId);
@@ -59,28 +59,32 @@ namespace BandCamp.Infrastructure.Repositories
 
         public void Add(Tour tour)
         {
-            string sql = @"INSERT INTO Tours (BandId, Name, StartDate, EndDate, Budget, Country)
-                           VALUES (@BandId, @Name, @StartDate, @EndDate, @Budget, @Country)";
+            string sql = @"INSERT INTO Tours (BandId, BandName, Name, StartDate, EndDate, Budget, Country)
+                           VALUES (@BandId, @BandName, @Name, @StartDate, @EndDate, @Budget, @Country)";
             using (var cmd = new SQLiteCommand(sql, _conn))
             {
                 cmd.Parameters.AddWithValue("@BandId", tour.BandId);
+                cmd.Parameters.AddWithValue("@BandName", tour.BandName ?? "");
                 cmd.Parameters.AddWithValue("@Name", tour.Name);
                 cmd.Parameters.AddWithValue("@StartDate", tour.StartDate.ToString("yyyy-MM-dd"));
                 cmd.Parameters.AddWithValue("@EndDate", tour.EndDate.ToString("yyyy-MM-dd"));
                 cmd.Parameters.AddWithValue("@Budget", tour.Budget);
                 cmd.Parameters.AddWithValue("@Country", tour.Country ?? "");
                 cmd.ExecuteNonQuery();
-                tour.Id = (int)new SQLiteCommand("SELECT last_insert_rowid()", _conn).ExecuteScalar();
+                tour.Id = (int)(long)new SQLiteCommand(
+                    "SELECT last_insert_rowid()", _conn).ExecuteScalar();
             }
         }
 
         public void Update(Tour tour)
         {
-            string sql = @"UPDATE Tours SET Name=@Name, StartDate=@StartDate,
-                           EndDate=@EndDate, Budget=@Budget, Country=@Country
+            string sql = @"UPDATE Tours SET BandId=@BandId, BandName=@BandName, Name=@Name,
+                           StartDate=@StartDate, EndDate=@EndDate, Budget=@Budget, Country=@Country
                            WHERE Id=@Id";
             using (var cmd = new SQLiteCommand(sql, _conn))
             {
+                cmd.Parameters.AddWithValue("@BandId", tour.BandId);
+                cmd.Parameters.AddWithValue("@BandName", tour.BandName ?? "");
                 cmd.Parameters.AddWithValue("@Name", tour.Name);
                 cmd.Parameters.AddWithValue("@StartDate", tour.StartDate.ToString("yyyy-MM-dd"));
                 cmd.Parameters.AddWithValue("@EndDate", tour.EndDate.ToString("yyyy-MM-dd"));
@@ -105,6 +109,7 @@ namespace BandCamp.Infrastructure.Repositories
         {
             Id = Convert.ToInt32(r["Id"]),
             BandId = Convert.ToInt32(r["BandId"]),
+            BandName = r["BandName"].ToString(),
             Name = r["Name"].ToString(),
             StartDate = DateTime.Parse(r["StartDate"].ToString()),
             EndDate = DateTime.Parse(r["EndDate"].ToString()),

@@ -1,8 +1,9 @@
-﻿using System;
-using System.Drawing;
-using System.Windows.Forms;
+﻿using BandCamp.Patterns.Behavioral;
 using BandCamp.Patterns.Structural;
 using BandCamp.UI;
+using System;
+using System.Drawing;
+using System.Windows.Forms;
 
 namespace BandCamp
 {
@@ -17,6 +18,7 @@ namespace BandCamp
             InitializeComponent();
             _facade = new BandManagerFacade();
             SetupSidebar();
+            SetupUndoRedo();
             ShowView(new BandForm(_facade));
             SetActiveButton(btnNavBands);
         }
@@ -29,11 +31,32 @@ namespace BandCamp
             StyleNavButton(btnNavMembers, "Участники");
             StyleNavButton(btnNavTours, "Туры");
             StyleNavButton(btnNavConcerts, "Концерты");
+            StyleNavButton(buttonNavRecording, "Запись");
 
             btnNavBands.Click += (s, e) => { ShowView(new BandForm(_facade)); SetActiveButton(btnNavBands); };
             btnNavMembers.Click += (s, e) => { ShowView(new MemberForm(_facade)); SetActiveButton(btnNavMembers); };
-            btnNavTours.Click += (s, e) => { ShowView(new TourForm(_facade)); SetActiveButton(btnNavTours); };
-            btnNavConcerts.Click += (s, e) => { MessageBox.Show("Концерты — этап 2"); };
+            btnNavTours.Click += (s, e) =>
+            {
+                ShowView(new TourForm(_facade));
+                SetActiveButton(btnNavTours);
+            };
+            buttonNavRecording.Click += (s, e) =>
+            {
+                ShowView(new RecordingForm(_facade));
+                SetActiveButton(buttonNavRecording);
+            };
+            btnNavConcerts.Click += (s, e) =>
+            {
+                ShowView(new ConcertForm(_facade));
+                SetActiveButton(btnNavConcerts);
+            };
+
+            StyleNavButton(buttonNavReports, "Отчёты");
+            buttonNavReports.Click += (s, e) =>
+            {
+                ShowView(new ReportForm(_facade));
+                SetActiveButton(buttonNavReports);
+            };
         }
 
         private void StyleNavButton(Button btn, string text)
@@ -50,6 +73,8 @@ namespace BandCamp
             btn.Padding = new Padding(20, 0, 0, 0);
             btn.Cursor = Cursors.Hand;
         }
+
+
 
         private void SetActiveButton(Button btn)
         {
@@ -75,6 +100,61 @@ namespace BandCamp
         {
             base.OnFormClosing(e);
             Infrastructure.DatabaseConnection.Instance.Close();
+        }
+
+        private void SetupUndoRedo()
+        {
+            btnUndo.Click += (s, e) =>
+            {
+                CommandManager.Instance.Undo();
+                RefreshCurrentView();
+                UpdateUndoRedoButtons();
+            };
+
+            btnRedo.Click += (s, e) =>
+            {
+                CommandManager.Instance.Redo();
+                RefreshCurrentView();
+                UpdateUndoRedoButtons();
+            };
+        }
+
+        public void UpdateUndoRedoButtons()
+        {
+            btnUndo.Enabled = CommandManager.Instance.CanUndo;
+            btnRedo.Enabled = CommandManager.Instance.CanRedo;
+
+            if (CommandManager.Instance.CanUndo)
+                lblLastAction.Text = $"Отменить: {CommandManager.Instance.LastUndoDescription}";
+            else if (CommandManager.Instance.CanRedo)
+                lblLastAction.Text = $"Вернуть: {CommandManager.Instance.LastRedoDescription}";
+            else
+                lblLastAction.Text = "";
+        }
+
+        private void RefreshCurrentView()
+        {
+            if (_currentView is BandForm bf)
+            {
+                bf.RefreshList();
+            }
+            else if (_currentView is MemberForm mf)
+            {
+                mf.RefreshList();
+            }
+            else if (_currentView is ConcertForm cf)
+            {
+                cf.RefreshList();
+            }
+            else if (_currentView is RecordingForm rf)
+            {
+                rf.RefreshList();
+            }
+            else if (_currentView is TourForm tf)
+            {
+                tf.RefreshList();
+            }
+
         }
     }
 }

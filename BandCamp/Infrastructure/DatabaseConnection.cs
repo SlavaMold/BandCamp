@@ -55,8 +55,10 @@ namespace BandCamp.Infrastructure
         );
         CREATE TABLE IF NOT EXISTS Members (
             Id INTEGER PRIMARY KEY AUTOINCREMENT,
-            FullName TEXT NOT NULL,
+            FirstName TEXT NOT NULL,
+            LastName TEXT NOT NULL,
             Role TEXT,
+            ExperienceYears INTEGER DEFAULT 0,
             JoinDate TEXT,
             PhotoPath TEXT,
             IsActive INTEGER DEFAULT 1
@@ -71,6 +73,7 @@ namespace BandCamp.Infrastructure
         CREATE TABLE IF NOT EXISTS Tours (
             Id INTEGER PRIMARY KEY AUTOINCREMENT,
             BandId INTEGER NOT NULL,
+            BandName TEXT,
             Name TEXT NOT NULL,
             StartDate TEXT,
             EndDate TEXT,
@@ -78,15 +81,30 @@ namespace BandCamp.Infrastructure
             Country TEXT,
             FOREIGN KEY (BandId) REFERENCES Bands(Id)
         );
+        CREATE TABLE IF NOT EXISTS Contracts (
+            Id INTEGER PRIMARY KEY AUTOINCREMENT,
+            Type INTEGER NOT NULL,
+            StudioName TEXT,
+            ResponsiblePerson TEXT,
+            StartDate TEXT,
+            EndDate TEXT,
+            Payment REAL,
+            BandId INTEGER,
+            BandName TEXT,
+            ProductName TEXT,
+            FOREIGN KEY (BandId) REFERENCES Bands(Id)
+            );
         CREATE TABLE IF NOT EXISTS Concerts (
             Id INTEGER PRIMARY KEY AUTOINCREMENT,
-            TourId INTEGER NOT NULL,
-            City TEXT,
-            Venue TEXT,
+            Name TEXT NOT NULL,
+            BandId INTEGER,
+            BandName TEXT,
             Date TEXT,
-            TicketsSold INTEGER,
-            TicketPrice REAL,
-            FOREIGN KEY (TourId) REFERENCES Tours(Id)
+            ResponsiblePerson TEXT,
+            Payment REAL,
+            Comment TEXT,
+            ContractId INTEGER,
+            FOREIGN KEY (BandId) REFERENCES Bands(Id)
         );";
 
             using (var cmd = new SQLiteCommand(sql, _connection))

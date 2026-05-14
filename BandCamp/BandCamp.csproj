@@ -225,7 +225,12 @@
   <ItemGroup>
     <Compile Include="Infrastructure\DatabaseConnection.cs" />
     <Compile Include="Infrastructure\Repositories\BandRepository.cs" />
+    <Compile Include="Infrastructure\Repositories\ConcertRepository.cs" />
+    <Compile Include="Infrastructure\Repositories\ConcertService.cs" />
+    <Compile Include="Infrastructure\Repositories\ContractRepository.cs" />
     <Compile Include="Infrastructure\Repositories\IBandRepository.cs" />
+    <Compile Include="Infrastructure\Repositories\IConcertRepository.cs" />
+    <Compile Include="Infrastructure\Repositories\IContractRepository.cs" />
     <Compile Include="Infrastructure\Repositories\IMemberRepository.cs" />
     <Compile Include="Infrastructure\Repositories\IRepository.cs" />
     <Compile Include="Infrastructure\Repositories\ITourRepository.cs" />
@@ -239,11 +244,20 @@
     </Compile>
     <Compile Include="Models\Band.cs" />
     <Compile Include="Models\Concert.cs" />
+    <Compile Include="Models\Contract.cs" />
     <Compile Include="Models\Member.cs" />
     <Compile Include="Models\Tour.cs" />
     <Compile Include="Models\Track.cs" />
+    <Compile Include="Patterns\Behavioral\CommandManager.cs" />
+    <Compile Include="Patterns\Behavioral\DeleteCommands.cs" />
+    <Compile Include="Patterns\Behavioral\ICommand.cs" />
     <Compile Include="Patterns\Behavioral\ValidationHandler.cs" />
+    <Compile Include="Patterns\Creational\ContractFactory.cs" />
+    <Compile Include="Patterns\Creational\CsvReportFactory.cs" />
     <Compile Include="Patterns\Creational\DatabaseConnection.cs" />
+    <Compile Include="Patterns\Creational\IReport.cs" />
+    <Compile Include="Patterns\Creational\IReportFactory.cs" />
+    <Compile Include="Patterns\Creational\TextReportFactory.cs" />
     <Compile Include="Patterns\Creational\TourBuilder.cs" />
     <Compile Include="Patterns\Structural\BandManagerFacade.cs" />
     <Compile Include="Patterns\Structural\ExportBridge.cs" />
@@ -252,6 +266,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\BandService.cs" />
+    <Compile Include="Services\ContractService.cs" />
     <Compile Include="Services\MemberService.cs" />
     <Compile Include="Services\TourService.cs" />
     <Compile Include="UI\BandForm.cs">
@@ -259,6 +274,24 @@
     </Compile>
     <Compile Include="UI\BandForm.Designer.cs">
       <DependentUpon>BandForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\ConcertForm.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UI\ConcertForm.Designer.cs">
+      <DependentUpon>ConcertForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\RecordingForm.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UI\RecordingForm.Designer.cs">
+      <DependentUpon>RecordingForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\ReportForm.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UI\ReportForm.Designer.cs">
+      <DependentUpon>ReportForm.cs</DependentUpon>
     </Compile>
     <Compile Include="UI\TourForm.cs">
       <SubType>UserControl</SubType>
@@ -286,6 +319,9 @@
     </Compile>
     <EmbeddedResource Include="UI\BandForm.resx">
       <DependentUpon>BandForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\RecordingForm.resx">
+      <DependentUpon>RecordingForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\TourForm.resx">
       <DependentUpon>TourForm.cs</DependentUpon>

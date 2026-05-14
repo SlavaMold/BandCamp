@@ -1,23 +1,30 @@
-﻿using System.Collections.Generic;
-using BandCamp.Infrastructure.Repositories;
+﻿using BandCamp.Infrastructure.Repositories;
 using BandCamp.Models;
 using BandCamp.Patterns.Behavioral;
 using BandCamp.Patterns.Creational;
 using BandCamp.Services;
+using System;
+using System.Collections.Generic;
 
 namespace BandCamp.Patterns.Structural
 {
     public class BandManagerFacade
     {
+        private readonly ConcertService _concertService;
         private readonly BandService _bandService;
         private readonly MemberService _memberService;
         private readonly TourService _tourService;
+        private readonly ContractService _contractService;
 
         public BandManagerFacade()
         {
             _bandService = new BandService(new BandRepository());
             _memberService = new MemberService(new MemberRepository());
             _tourService = new TourService(new TourRepository());
+            _contractService = new ContractService(new ContractRepository());
+            _concertService = new ConcertService(
+            new ConcertRepository(),
+            new ContractRepository());
         }
 
         // --- Band operations ---
@@ -50,7 +57,8 @@ namespace BandCamp.Patterns.Structural
             if (member.Id == 0)
             {
                 _memberService.AddMember(member);
-                _memberService.AddMemberToBand(member.Id, bandId);
+                if (bandId > 0)
+                    _memberService.AddMemberToBand(member.Id, bandId);
             }
             else
             {
@@ -65,14 +73,25 @@ namespace BandCamp.Patterns.Structural
         public void RemoveMemberFromBand(int memberId, int bandId) =>
             _memberService.RemoveMemberFromBand(memberId, bandId);
 
+        public List<Member> GetAllMembers() => _memberService.GetAllMembers();
+
+        public Member GetMember(int id) => _memberService.GetMemberById(id);
+
+        public void DeleteMember(int id) => _memberService.DeleteMember(id);
+
         // --- Tour operations ---
 
-        public string SaveTour(TourBuilder builder)
+        public string CreateTour(
+    string name, int bandId, string bandName,
+    DateTime startDate, DateTime endDate,
+    decimal budget, string country)
         {
             try
             {
-                var tour = builder.Build();
-                _tourService.AddTour(tour);
+                _tourService.CreateTour(
+                    name, bandId, bandName,
+                    startDate, endDate,
+                    budget, country);
                 return null;
             }
             catch (System.Exception ex)
@@ -82,6 +101,11 @@ namespace BandCamp.Patterns.Structural
         }
 
         public List<Tour> GetToursOfBand(int bandId) =>
+            _tourService.GetToursByBandId(bandId);
+
+        public List<Tour> GetAllTours() => _tourService.GetAllTours();
+
+        public List<Tour> GetToursByBand(int bandId) =>
             _tourService.GetToursByBandId(bandId);
 
         public void DeleteTour(int id) => _tourService.DeleteTour(id);
@@ -130,5 +154,74 @@ namespace BandCamp.Patterns.Structural
             exporter.Export();
         }
 
+    public void CreateRecordingContract(
+    string studioName, string responsiblePerson,
+    DateTime startDate, DateTime endDate,
+    decimal payment, int bandId, string bandName, string productName)
+        {
+            _contractService.CreateContract(
+                ContractType.Recording,
+                studioName, responsiblePerson,
+                startDate, endDate,
+                payment, bandId, bandName, productName);
+        }
+
+        public List<Contract> GetAllContracts() =>
+            _contractService.GetAllContracts();
+
+        public List<Contract> GetRecordingContracts() =>
+            _contractService.GetByType(ContractType.Recording);
+
+        public void DeleteContract(int id) =>
+            _contractService.DeleteContract(id);
+
+
+    public void CreateConcert(
+    string name, int bandId, string bandName,
+    DateTime date, string responsiblePerson,
+    decimal payment, string comment)
+        {
+            _concertService.CreateConcertWithContract(
+            name, bandId, bandName,
+            date, responsiblePerson,
+            payment, comment);
+        }
+
+        public List<Concert> GetAllConcerts() =>
+            _concertService.GetAllConcerts();
+
+        public void DeleteConcert(int id) =>
+            _concertService.DeleteConcert(id);
+
+        public string GenerateTextReport(string reportType)
+        {
+            IReportFactory factory = new TextReportFactory();
+            IReport report = BuildReport(factory, reportType);
+            return report?.Generate() ?? "Неизвестный тип отчёта";
+        }
+
+        public string GenerateCsvReport(string reportType, string outputFolder)
+        {
+            IReportFactory factory = new CsvReportFactory(outputFolder);
+            IReport report = BuildReport(factory, reportType);
+            return report?.Generate() ?? "Неизвестный тип отчёта";
+        }
+
+        private IReport BuildReport(IReportFactory factory, string reportType)
+        {
+            switch (reportType)
+            {
+                case "members":
+                    return factory.CreateMembersReport(_memberService.GetAllMembers());
+                case "concerts":
+                    return factory.CreateConcertsReport(_concertService.GetAllConcerts());
+                case "contracts":
+                    return factory.CreateContractsReport(_contractService.GetAllContracts());
+                default:
+                    return null;
+            }
+        }
+
     }
+
 }

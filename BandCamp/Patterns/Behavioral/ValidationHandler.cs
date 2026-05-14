@@ -49,9 +49,9 @@ namespace BandCamp.Patterns.Behavioral
         {
             if (model is Member member)
             {
-                if (string.IsNullOrWhiteSpace(member.FullName))
+                if (string.IsNullOrWhiteSpace(member.FirstName))
                     return "Имя участника не может быть пустым";
-                if (member.FullName.Length < 2)
+                if (member.FirstName.Length < 2)
                     return "Имя участника слишком короткое";
             }
             return _next?.Handle(model);
